@@ -1,0 +1,30 @@
+# Local CPU smoke-test variant of triggering_low_resource.yaml — small model,
+# tiny idiomaticity sample, just to validate the pipeline end-to-end before
+# submitting the full-scale SLURM run (scripts/run_triggering_slurm.sh).
+
+language_pair: "ha-en+en-ha+km-en+ps-en+xh-zu+zu-xh"
+model_name: "Qwen/Qwen2.5-0.5B-Instruct (idiomaticity, SMOKE TEST ONLY) + facebook/nllb-200-distilled-600M + en_core_web_sm"
+sample_size: full
+random_seed: 42
+data_source: "RicardoRei/wmt-da-human-evaluation (via agentic_mt.qe.data, Phase 1)"
+output_dir: results/triggering_low_resource_smoketest
+
+target_langs: [ha, km, ps, xh, zu]
+feature_extractors: [sentence_length, oov_rate, idiomaticity, parse_depth, domain_marker_count]
+low_quality_quantile: 0.25
+
+extractor_kwargs:
+  idiomaticity:
+    model_name: Qwen/Qwen2.5-0.5B-Instruct
+    sample_size: 20
+    cache_file: results/triggering_low_resource_smoketest/idiomaticity_cache.jsonl
+    batch_size: 4
+    device_map: cpu
+
+models:
+  - name: universal
+    features: [sentence_length, oov_rate]
+  - name: with_idiomaticity
+    features: [sentence_length, oov_rate, idiomaticity]
+  - name: full_english_source
+    features: [sentence_length, oov_rate, idiomaticity, parse_depth, domain_marker_count]

@@ -5,14 +5,19 @@ description = "Agentic MT experiments: quality estimation, triggering, and trans
 readme = "README.md"
 requires-python = ">=3.10,<3.12"
 dependencies = [
+    "accelerate>=1.14.0",
     "anthropic>=0.116.0",
+    "click>=8.4.2",
     "datasets>=5.0.0",
+    "en-core-web-sm",
     "matplotlib>=3.10.9",
     "pandas>=2.3.3",
     "python-dotenv>=1.2.2",
     "pyyaml>=6.0.3",
     "sacrebleu>=2.6.0",
+    "scikit-learn>=1.7.2",
     "scipy>=1.15.3",
+    "spacy>=3.8.14",
     "tabulate>=0.10.0",
     "tqdm>=4.68.3",
     "unbabel-comet>=2.2.7",
@@ -20,6 +25,9 @@ dependencies = [
 
 [tool.uv]
 package = true
+
+[tool.uv.sources]
+en-core-web-sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl" }
 
 [build-system]
 requires = ["hatchling"]

@@ -1,0 +1,36 @@
+# Triggering-feature experiment: which source-side features predict low
+# translation quality? Reuses Phase 1's low-resource WMT DA rows.
+# See configs/schema.md for the required-field convention this extends.
+
+language_pair: "ha-en+en-ha+km-en+ps-en+xh-zu+zu-xh"
+model_name: "meta-llama/Llama-3.1-8B-Instruct (idiomaticity) + facebook/nllb-200-distilled-600M (oov proxy) + en_core_web_sm (parse depth, English-source rows only)"
+sample_size: full
+random_seed: 42
+data_source: "RicardoRei/wmt-da-human-evaluation (via agentic_mt.qe.data, Phase 1)"
+output_dir: results/triggering_low_resource
+
+# Pipeline-specific fields
+target_langs: [ha, km, ps, xh, zu]
+feature_extractors: [sentence_length, oov_rate, idiomaticity, parse_depth, domain_marker_count]
+low_quality_quantile: 0.25   # bottom 25% of quality_score, per language, labeled "low quality"
+
+extractor_kwargs:
+  idiomaticity:
+    model_name: meta-llama/Llama-3.1-8B-Instruct
+    sample_size: null          # score every row — run via SLURM (scripts/run_triggering_slurm.sh),
+                                # not the login node; full-scale, one GPU per language (array job).
+    cache_file: results/triggering_low_resource/features/idiomaticity_cache.jsonl
+    batch_size: 32
+    device_map: auto
+
+# Each model drops rows missing any of its own features (see modeling.py) —
+# no need to filter rows manually; "full_english_source" will naturally end
+# up restricted to the en-ha slice, since parse_depth/domain_marker_count are
+# English-source-only.
+models:
+  - name: universal
+    features: [sentence_length, oov_rate]
+  - name: with_idiomaticity
+    features: [sentence_length, oov_rate, idiomaticity]
+  - name: full_english_source
+    features: [sentence_length, oov_rate, idiomaticity, parse_depth, domain_marker_count]

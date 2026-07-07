@@ -45,7 +45,7 @@ def load_human_da(target_langs: list[str]) -> pd.DataFrame:
 
     df["quality_score"] = df.groupby("lang")["da_score"].transform(_minmax)
 
-    return df[["source", "hypothesis", "reference", "lang", "domain", "year", "da_score", "quality_score"]]
+    return df[["source", "hypothesis", "reference", "lang", "lp", "domain", "year", "da_score", "quality_score"]]
 
 
 def _load_metric_checkpoint(mqmbench_root: Path, metric: str, target_langs: list[str]) -> pd.DataFrame:
