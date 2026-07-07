@@ -20,9 +20,11 @@ data/**
 !data/processed/
 !data/processed/.gitkeep
 
-# Results: keep directory structure, ignore run outputs
+# Results: keep directory structure and the running lab-notebook summary,
+# ignore per-run CSVs/plots
 results/**
 !results/.gitkeep
+!results/phase_1_summary.md
 
 # Notebook checkpoints
 .ipynb_checkpoints/

@@ -6,12 +6,14 @@ readme = "README.md"
 requires-python = ">=3.10,<3.12"
 dependencies = [
     "anthropic>=0.116.0",
+    "datasets>=5.0.0",
     "matplotlib>=3.10.9",
     "pandas>=2.3.3",
     "python-dotenv>=1.2.2",
     "pyyaml>=6.0.3",
     "sacrebleu>=2.6.0",
     "scipy>=1.15.3",
+    "tabulate>=0.10.0",
     "tqdm>=4.68.3",
     "unbabel-comet>=2.2.7",
 ]
