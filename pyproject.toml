@@ -1,0 +1,27 @@
+[project]
+name = "agentic-mt"
+version = "0.1.0"
+description = "Agentic MT experiments: quality estimation, triggering, and translation pipelines"
+readme = "README.md"
+requires-python = ">=3.10,<3.12"
+dependencies = [
+    "anthropic>=0.116.0",
+    "matplotlib>=3.10.9",
+    "pandas>=2.3.3",
+    "python-dotenv>=1.2.2",
+    "pyyaml>=6.0.3",
+    "sacrebleu>=2.6.0",
+    "scipy>=1.15.3",
+    "tqdm>=4.68.3",
+    "unbabel-comet>=2.2.7",
+]
+
+[tool.uv]
+package = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentic_mt"]
