@@ -1,0 +1,27 @@
+# Four translation conditions (L1_baseline, L1_cot, L1_tool, L1_cot_tool) on
+# the same source sentences / same model, for a high-resource pair (en-de,
+# replication check against Wu, Aycock & Monz 2025) and a low-resource pair
+# (en-ha, from Phase 1/2). See configs/schema.md for the required-field
+# convention this extends.
+
+language_pair: "en-de+en-ha"
+# Aya-101 (CohereForAI/aya-101, Apache-2.0, ungated): chosen over the newer
+# Aya-23/Aya-Expanse models specifically because those only cover ~23 major
+# languages and DROP Hausa entirely, whereas Aya-101 explicitly covers all
+# five of Phase 1/2's low-resource languages (hau/khm/pus/xho/zul). T5-based
+# encoder-decoder, not conversation-tuned — see pipelines/llm.py for how
+# multi-turn context is handled without a chat template.
+model_name: CohereForAI/aya-101
+sample_size: 100
+random_seed: 42
+data_source: "RicardoRei/wmt-mqm-human-evaluation (en-de) + RicardoRei/wmt-da-human-evaluation (en-ha), via agentic_mt.pipelines.data"
+output_dir: results/pipelines_l1_conditions
+
+# Pipeline-specific fields
+pairs: [en-de, en-ha]
+high_resource_pair: en-de
+low_resource_pair: en-ha
+conditions: [l1_baseline, l1_cot, l1_tool, l1_cot_tool]
+metrics: [cometkiwi, comet, chrf]
+n_bootstrap: 1000
+gpus: 1

@@ -26,6 +26,7 @@ results/**
 !results/.gitkeep
 !results/phase_1_summary.md
 !results/phase_2_summary.md
+!results/phase_3_summary.md
 
 # SLURM job logs
 logs/
