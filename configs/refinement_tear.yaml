@@ -1,0 +1,16 @@
+# TEaR self-refinement (condition A) vs. COMET-KIWI-guided refinement
+# (condition B), 4 iterations, en-de. Reuses Phase 3's exact 100-sentence
+# en-de test sample (same seed) for cross-experiment comparability.
+# See configs/schema.md for the required-field convention this extends.
+
+language_pair: en-de
+model_name: Qwen/Qwen2.5-32B-Instruct
+sample_size: 100
+random_seed: 42
+data_source: "RicardoRei/wmt-mqm-human-evaluation (en-de), via agentic_mt.pipelines.data (same sample as Phase 3)"
+output_dir: results/refinement_tear
+
+# Pipeline-specific fields
+n_iterations: 4
+qe_threshold: 0.85   # condition B: COMET-KIWI score at/above this freezes a sentence
+metrics: [cometkiwi, comet, chrf]
