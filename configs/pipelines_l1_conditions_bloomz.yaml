@@ -1,0 +1,32 @@
+# Phase 5: unconfounded rerun of Phase 3's joint-necessity test.
+# Phase 3 used Aya-101, which is NOT conversation-tuned (T5 seq2seq,
+# single-turn) — the CoT chain visibly degenerated (70-90% verbatim
+# draft/refine/proofread repeats), so the "CoT hurts" finding there is
+# confounded with model architecture, not just model capability.
+#
+# BLOOMZ-7b1 is a real causal, instruction-tuned decoder model (no chat
+# template, but pipelines/llm.py's flatten fallback handles that) that
+# actually covers Xhosa/Zulu/Swahili — unlike the newer Aya-23/Aya-Expanse
+# models, which drop African-language coverage entirely (see Phase 3's
+# summary for how that was discovered). It does NOT cover Hausa, hence the
+# separate InkubaLM config for that comparison.
+#
+# en-xh/en-zu/en-sw source data comes from FLORES-plus (devtest), since
+# WMT DA has zero English-source rows for xh/zu/sw at all — see
+# pipelines/data.py's load_flores_pair docstring.
+
+language_pair: "en-de+en-xh+en-zu+en-sw"
+model_name: bigscience/bloomz-7b1
+sample_size: 100
+random_seed: 42
+data_source: "RicardoRei/wmt-mqm-human-evaluation (en-de) + openlanguagedata/flores_plus devtest (en-xh, en-zu, en-sw)"
+output_dir: results/pipelines_l1_conditions_bloomz
+
+# Pipeline-specific fields
+pairs: [en-de, en-xh, en-zu, en-sw]
+high_resource_pair: en-de
+low_resource_pair: en-xh   # used for the primary gap comparison; en-zu/en-sw analyzed alongside
+conditions: [l1_baseline, l1_cot, l1_tool, l1_cot_tool]
+metrics: [cometkiwi, comet, chrf]
+n_bootstrap: 1000
+gpus: 1

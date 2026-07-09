@@ -91,8 +91,10 @@ def resource_gap_comparison(
         rows.append({
             "metric": metric,
             "gap": f"{cond_a} - {cond_b}",
-            f"gap_{high_resource_pair}": float(gaps[high_resource_pair].mean()),
-            f"gap_{low_resource_pair}": float(gaps[low_resource_pair].mean()),
+            "high_resource_pair": high_resource_pair,
+            "low_resource_pair": low_resource_pair,
+            "gap_high_resource": float(gaps[high_resource_pair].mean()),
+            "gap_low_resource": float(gaps[low_resource_pair].mean()),
             "diff_of_gaps": float(diff_of_gaps.mean()),
             "diff_ci_lo": float(ci_lo),
             "diff_ci_hi": float(ci_hi),

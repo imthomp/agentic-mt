@@ -27,7 +27,7 @@ from agentic_mt.pipelines.scoring import score_all
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
 logger = logging.getLogger(__name__)
 
-TARGET_LANG_NAME = {"en-de": "German", "en-ha": "Hausa"}
+TARGET_LANG_NAME = {"en-de": "German", "en-ha": "Hausa", "en-xh": "Xhosa", "en-zu": "Zulu", "en-sw": "Swahili"}
 SOURCE_LANG_NAME = "English"
 
 # Conditions that need a retrieved TM match.
@@ -97,7 +97,7 @@ def run_pair(config: dict, pair: str) -> Path:
 def run_analysis(config: dict) -> Path:
     pairs = config["pairs"]
     high_resource_pair = config["high_resource_pair"]
-    low_resource_pair = config["low_resource_pair"]
+    low_resource_pairs = config.get("low_resource_pairs") or [config["low_resource_pair"]]
     metrics = config.get("metrics", ["cometkiwi", "comet", "chrf"])
     n_bootstrap = config.get("n_bootstrap", 1000)
     seed = config["random_seed"]
@@ -116,15 +116,17 @@ def run_analysis(config: dict) -> Path:
     sig_df = pd.concat(sig_frames, ignore_index=True)
     sig_df.to_csv(out_dir / "pairwise_significance.csv", index=False)
 
-    gap_frames = [
-        resource_gap_comparison(df, metric, high_resource_pair, low_resource_pair, n_resamples=n_bootstrap, seed=seed)
-        for metric in metrics
-    ]
+    gap_frames = []
+    for low_resource_pair in low_resource_pairs:
+        for metric in metrics:
+            gap_frames.append(
+                resource_gap_comparison(df, metric, high_resource_pair, low_resource_pair, n_resamples=n_bootstrap, seed=seed)
+            )
     gap_df = pd.concat(gap_frames, ignore_index=True)
     gap_df.to_csv(out_dir / "resource_gap_comparison.csv", index=False)
 
     report_path = out_dir / "report.md"
-    _write_report(report_path, means, sig_df, gap_df, high_resource_pair, low_resource_pair)
+    _write_report(report_path, means, sig_df, gap_df, high_resource_pair, low_resource_pairs)
 
     print(f"Wrote condition means to {out_dir / 'condition_means.csv'}")
     print(f"Wrote pairwise significance to {out_dir / 'pairwise_significance.csv'}")
@@ -134,9 +136,9 @@ def run_analysis(config: dict) -> Path:
 
 
 def _write_report(path: Path, means: pd.DataFrame, sig_df: pd.DataFrame, gap_df: pd.DataFrame,
-                   high_resource_pair: str, low_resource_pair: str) -> None:
+                   high_resource_pair: str, low_resource_pairs: list[str]) -> None:
     lines = ["# L1 translation-condition experiment\n"]
-    lines.append(f"High-resource pair: {high_resource_pair}. Low-resource pair: {low_resource_pair}.\n")
+    lines.append(f"High-resource pair: {high_resource_pair}. Low-resource pair(s): {', '.join(low_resource_pairs)}.\n")
     lines.append("## Mean score per condition per pair\n")
     lines.append(means.to_markdown(index=False))
     lines.append("\n## Paired bootstrap significance between conditions\n")

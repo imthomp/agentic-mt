@@ -1,0 +1,28 @@
+# Phase 5: InkubaLM track of the unconfounded Phase 3 rerun. InkubaLM
+# (Lelapa AI) is a small (0.4B) causal Llama-architecture model purpose-built
+# for African languages, explicitly covering Hausa — unlike BLOOMZ, which
+# covers Xhosa/Zulu/Swahili but not Hausa. Preserves comparability with
+# Phase 1-3's en-ha results, at the cost of using a much smaller/weaker model
+# than BLOOMZ or Aya-101 — worth treating that as its own variable when
+# interpreting results (capability confound, distinct from Phase 3's
+# conversational-tuning confound).
+#
+# Gated model requiring manual approval on HuggingFace — do not attempt to
+# auto-accept; only proceed once the user confirms access is granted.
+# Needs trust_remote_code=True (custom model class) — see pipelines/llm.py.
+
+language_pair: "en-de+en-ha"
+model_name: lelapa/InkubaLM-0.4B
+sample_size: 100
+random_seed: 42
+data_source: "RicardoRei/wmt-mqm-human-evaluation (en-de) + RicardoRei/wmt-da-human-evaluation (en-ha)"
+output_dir: results/pipelines_l1_conditions_inkuba
+
+# Pipeline-specific fields
+pairs: [en-de, en-ha]
+high_resource_pair: en-de
+low_resource_pair: en-ha
+conditions: [l1_baseline, l1_cot, l1_tool, l1_cot_tool]
+metrics: [cometkiwi, comet, chrf]
+n_bootstrap: 1000
+gpus: 1

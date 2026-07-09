@@ -16,12 +16,17 @@ for the tool-use conditions — so a test sentence is never trivially
 retrieved against itself.
 """
 
+import json
+import functools
+
 import pandas as pd
 from datasets import load_dataset
+from huggingface_hub import hf_hub_download
 
 from agentic_mt.qe.data import load_human_da
 
 WMT_MQM_DATASET = "RicardoRei/wmt-mqm-human-evaluation"
+FLORES_DATASET = "openlanguagedata/flores_plus"
 
 
 def load_ende_pairs() -> pd.DataFrame:
@@ -36,9 +41,34 @@ def load_enha_pairs() -> pd.DataFrame:
     return enha
 
 
+def _load_flores_lang(flores_code: str, split: str = "devtest") -> pd.DataFrame:
+    path = hf_hub_download(FLORES_DATASET, f"{split}/{flores_code}.jsonl", repo_type="dataset")
+    with open(path) as f:
+        rows = [json.loads(line) for line in f]
+    return pd.DataFrame(rows)[["id", "text"]]
+
+
+def load_flores_pair(tgt_flores_code: str) -> pd.DataFrame:
+    """English-source pairs from FLORES-plus devtest, joined by sentence id.
+
+    Used for language directions absent from the WMT DA/MQM data entirely
+    (e.g. en-xh, en-zu, en-sw all have zero rows in wmt-da-human-evaluation —
+    xh/zu only appear as xh-zu/zu-xh there, never with English). No human
+    quality scores here, but Phase 3+'s design doesn't need them — only
+    (source, reference) pairs to translate and score with COMET/chrF.
+    """
+    eng = _load_flores_lang("eng_Latn").rename(columns={"text": "source"})
+    tgt = _load_flores_lang(tgt_flores_code).rename(columns={"text": "reference"})
+    merged = eng.merge(tgt, on="id")[["source", "reference"]]
+    return merged.drop_duplicates(subset="source").reset_index(drop=True)
+
+
 LOADERS = {
     "en-de": load_ende_pairs,
     "en-ha": load_enha_pairs,
+    "en-xh": functools.partial(load_flores_pair, "xho_Latn"),
+    "en-zu": functools.partial(load_flores_pair, "zul_Latn"),
+    "en-sw": functools.partial(load_flores_pair, "swh_Latn"),
 }
 
 
