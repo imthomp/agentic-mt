@@ -1,6 +1,6 @@
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
-\usepackage{lmodern}
+\usepackage{XCharter}
 \usepackage{enumitem}
 \usepackage{titlesec}
 \usepackage{booktabs}
@@ -34,36 +34,36 @@ necessary, most valuable for low-resource pairs). Code and full per-phase logs i
 
 The central joint-necessity claim has not been confirmed or falsified --- every direct test
 has hit a model confound first. We do have real evidence against the simplest instantiations
-of two supporting mechanisms (QE-in-the-loop, source-side triggering), and a new finding that
-a model's raw pretraining exposure to a language is itself a hard gate on generation, separate
-from anything the agentic scaffolding does.
+of two supporting mechanisms (QE-in-the-loop, source-side triggering), and a new finding, from one model across four language points (BLOOMZ, Phase 6), that
+raw pretraining exposure to a language can be a hard gate on generation, separate from anything
+the agentic scaffolding does.
 
 \section*{Phase-by-phase}
 
 \begin{center}
 \footnotesize
-\begin{tabular}{@{}p{2.0cm}p{5.4cm}p{7.1cm}@{}}
+\begin{tabular}{@{}>{\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\arraybackslash}p{2.6cm}p{5.1cm}p{6.6cm}@{}}
 \toprule
 \textbf{Phase} & \textbf{Setup} & \textbf{Finding} \\
 \midrule
 1: QE reliability &
-  COMET-KIWI vs.\ real WMT DA human scores, \PhaseOneNPairsTotal{} low-resource pairs, 1000-sample bootstrap &
+  COMET-KIWI vs.\ real WMT DA human scores, \PhaseOneNPairsTotal{} low-resource pairs (ha/km/ps/xh/zu), 1000-sample bootstrap &
   Below \PhaseOneFlagThreshold{} for \PhaseOneNPairsFlagged/\PhaseOneNPairsTotal{} pairs (ha $\PhaseOneHaSpearman$, ps $\PhaseOnePsSpearman$, zu $\PhaseOneZuSpearman$); km/xh weak but usable \\
 2: Triggering &
-  5 source-side features + logistic regression on Phase 1's data ($n=\PhaseTwoModelUniversalN$) &
+  5 source-side features + logistic regression on Phase 1's data, same 5 pairs ($n=\PhaseTwoModelUniversalN$) &
   No feature or model beats chance (AUC $\PhaseTwoModelUniversalAuc$--$\PhaseTwoModelFullAuc$); pooled OOV signal ($r=\PhaseTwoOovPooledPearson$) is a Simpson's-paradox artifact \\
-3: Joint necessity (Aya-101) &
-  4 conditions $\times$ en-de/en-ha $\times$ \PhaseThreeNSentencesPerPair{} sentences &
+3: Joint necessity &
+  Aya-101, 4 conditions $\times$ en-de/en-ha $\times$ \PhaseThreeNSentencesPerPair{} sentences &
   Tool-alone wins both pairs; CoT hurts; gap differs by resource level ($p=\PhaseThreeGapTestPLo$--$\PhaseThreeGapTestPHi$) --- but CoT chain degenerates (see Fig.~1) \\
-4: Refinement (Qwen2.5-32B) &
-  TEaR self-critique vs.\ external-QE refine, en-de, \PhaseFourNSentences{} sentences, \PhaseFourNIterations{} iterations &
+4: Refinement &
+  Qwen2.5-32B, TEaR self-critique vs.\ external-QE refine, en-de, \PhaseFourNSentences{} sentences, \PhaseFourNIterations{} iterations &
   Neither condition peaks-then-declines; both improve gradually to iteration \PhaseFourCondAPeakIteration, matching TEaR's actual reported pattern \\
 5: Model search &
-  Tried BLOOMZ, InkubaLM as open, conversation-tuned models covering low-resource languages &
+  Tried BLOOMZ, InkubaLM as open, conversation-tuned models covering ha/km/ps/xh/zu &
   Both ruled out: InkubaLM incoherent even in English (\PhaseFiveInkubalmParamsB{} B params); BLOOMZ needed \PhaseFiveNBugsFixedBloomzInkubalm{} fixes, then failed on exposure grounds \\
 6: Exposure floor &
   BLOOMZ smoke test, en-fr/en-sw/en-xh/en-zu, 10 sentences/pair, hand-categorized &
-  Clean-generation rate tracks ROOTS pretraining bytes monotonically (see Fig.~2) \\
+  Clean-generation rate tracks ROOTS pretraining bytes monotonically, this model only (see Fig.~2) \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -73,12 +73,12 @@ from anything the agentic scaffolding does.
 \subsection*{Challenges to specific proposed mechanisms}
 
 \begin{itemize}
-  \item \textbf{QE-in-the-loop (Sec.~5.3) is not viable as specified for most target
-    languages.} An en-de benchmark of $\approx\PhaseOneEndeBenchmarkSpearman$ sets the bar these
+  \item \textbf{QE-in-the-loop (Sec.~5.3) is not viable as specified for most of the
+    5 low-resource pairs tested (ha/km/ps/xh/zu).} An en-de benchmark of $\approx\PhaseOneEndeBenchmarkSpearman$ sets the bar these
     pairs miss. To trust more: extend beyond the five pairs with real human judgments; current
     coverage is a hard ceiling on what we can check.
-  \item \textbf{Source-side triggering (Sec.~5.1) shows no signal from cheap features,} against
-    a chance baseline of $\PhaseTwoAucChance$. The pooled OOV correlation evaporates to
+  \item \textbf{Source-side triggering (Sec.~5.1) shows no signal from cheap features on
+    these same 5 pairs,} against a chance baseline of $\PhaseTwoAucChance$. The pooled OOV correlation evaporates to
     $\PhaseTwoOovPerlangLo$--$\PhaseTwoOovPerlangHi$ once controlled for language. To trust
     more: a real domain classifier and a frequency-list OOV measure before calling triggering a
     dead end rather than an implementation gap.
@@ -88,7 +88,7 @@ from anything the agentic scaffolding does.
 
 \begin{itemize}
   \item \textbf{Phase 3}: Aya-101 is not conversation-tuned, and its CoT chain produced
-    byte-identical draft/refine/proofread output in
+    byte-identical draft\slash refine\slash proofread output in
     \PhaseThreeCotVerbatimRepeatEnde--\PhaseThreeCottoolVerbatimRepeatEnha{} of
     \PhaseThreeVerbatimRepeatDenominator{} sentences (Fig.~1). The ``CoT hurts'' result is real in
     the sense that it's what happened, but is confounded with architecture, not a clean test of
@@ -139,8 +139,10 @@ Three ways to get an unconfounded joint-necessity result:
     target languages. Two candidates already ruled out; no known third, and preserves an
     all-open-source stack.
   \item \textbf{Split the two roles}: an API model for reasoning, a Church-fine-tuned NLLB
-    model queried as the tool. Sidesteps Phase 6's exposure floor entirely (NLLB is
-    purpose-built at scale for these pairs) and more faithfully tests the theory's actual claim
+    model queried as the tool. Sidesteps Phase 6's exposure floor (NLLB-200 targets all five pairs by design, though
+    we have not verified its per-language training scale the way Phase 6 did for BLOOM/mT5 ---
+    that check should happen before committing to this option) and more faithfully tests the
+    theory's actual claim
     (reasoning \emph{and} tool use, not one model doing both). Costs API spend, drops the
     fully-open constraint.
   \item \textbf{Narrow scope}: run the test on one pair BLOOMZ already generates reliably
