@@ -34,6 +34,14 @@ results/**
 # SLURM job logs
 logs/
 
+# LaTeX build artifacts
+reports/*.aux
+reports/*.log
+reports/*.out
+reports/*.fls
+reports/*.fdb_latexmk
+reports/*.synctex.gz
+
 # Notebook checkpoints
 .ipynb_checkpoints/
 

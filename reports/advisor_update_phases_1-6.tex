@@ -1,0 +1,190 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\input{macros.tex}
+
+\setlist{noitemsep, topsep=2pt, parsep=0pt, partopsep=0pt}
+\titlespacing*{\section}{0pt}{8pt}{4pt}
+\titlespacing*{\subsection}{0pt}{6pt}{3pt}
+
+\title{Agentic MT: Phases 1--6 Update}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{-2em}
+
+\section*{Where the theory stands}
+
+Six phases in, the central joint-necessity claim (slow thinking and tool use are each
+insufficient alone, jointly sufficient, and most valuable for low-resource pairs) has not
+been confirmed or falsified --- every attempt to test it directly has run into a model
+confound before producing a clean signal. What we do have is real, independent evidence
+against the simplest instantiations of two supporting mechanisms (QE-in-the-loop, source-side
+triggering), and a new, well-evidenced finding that a base model's raw pretraining exposure to
+a language is itself a hard gate on generation, separate from anything the agentic scaffolding
+does. Net effect: two of the five proposed research directions have real evidence against their
+first-pass implementations, the flagship joint-necessity test remains open, and we've learned
+something the theory didn't originally account for.
+
+\section*{Findings, by implication}
+
+\subsection*{Challenges to specific proposed mechanisms}
+
+\begin{itemize}
+  \item \textbf{QE-in-the-loop (Sec.~5.3) is not viable as specified for most of the target
+    languages.} COMET-KIWI vs.\ human DA Spearman $r$ falls below the \PhaseOneFlagThreshold
+    threshold for \PhaseOneNPairsFlagged of \PhaseOneNPairsTotal low-resource pairs tested:
+    ha $=\PhaseOneHaSpearman$ (95\% CI [\PhaseOneHaCiLo, \PhaseOneHaCiHi], $n=\PhaseOneHaN$),
+    ps $=\PhaseOnePsSpearman$, zu $=\PhaseOneZuSpearman$ --- versus an en-de benchmark of
+    $\approx\PhaseOneEndeBenchmarkSpearman$. To trust this more: extend beyond the five pairs
+    with real WMT DA/MQM human judgments; current coverage is a hard ceiling on what we can
+    check.
+  \item \textbf{Source-side triggering (Sec.~5.1) shows no signal from cheap features.} Five
+    feature families (length, OOV proxy, LLM-rated idiomaticity, parse depth, domain markers)
+    predict low quality at AUC $\PhaseTwoModelUniversalAuc$--$\PhaseTwoModelFullAuc$ against a
+    chance baseline of $\PhaseTwoAucChance$. One promising-looking pooled correlation (OOV
+    rate, pooled Pearson $r=\PhaseTwoOovPooledPearson$) evaporates to
+    $\PhaseTwoOovPerlangLo$--$\PhaseTwoOovPerlangHi$ once controlled for language --- a genuine
+    Simpson's paradox, not noise. To trust this more: test a real domain classifier and a
+    frequency-list OOV measure (not a tokenizer-fragmentation proxy) before concluding
+    triggering is a dead end rather than an implementation gap.
+\end{itemize}
+
+\subsection*{The central joint-necessity claim: confounded, not resolved}
+
+\begin{itemize}
+  \item \textbf{Phase 3} (Aya-101, en-de/en-ha, $n=\PhaseThreeNSentencesPerPair$/pair):
+    tool-alone beat every other condition on both pairs, and the CoT-vs-tool gap differed
+    significantly by resource level (paired-bootstrap $p=\PhaseThreeGapTestPLo$--$\PhaseThreeGapTestPHi$
+    across metrics). But Aya-101 is not conversation-tuned, and its CoT chain produced
+    byte-identical draft/refine/proofread output in
+    \PhaseThreeCotVerbatimRepeatEnde--\PhaseThreeCottoolVerbatimRepeatEnha out of
+    \PhaseThreeVerbatimRepeatDenominator sentences depending on pair/condition. The
+    ``CoT hurts'' result is real in the sense that it's what happened, but is confounded with
+    architecture, not a clean test of reasoning per se.
+  \item \textbf{Phase 4} (Qwen2.5-32B, en-de only, $n=\PhaseFourNSentences$,
+    \PhaseFourNIterations iterations): neither self-critique (condition A) nor external-QE
+    refinement (condition B) peaked early and declined; both improved gradually to iteration
+    \PhaseFourCondAPeakIteration/\PhaseFourCondBPeakIteration (gain
+    $\PhaseFourCondAGainIterOneToPeakCometkiwi$/$\PhaseFourCondBGainIterOneToPeakCometkiwi$
+    COMET-KIWI from iteration 1 to peak). This matches what Feng et al.\ actually report for
+    TEaR, not the early-peak hypothesis we set out to test (that pattern belongs to a
+    different paper). Secondary finding worth a follow-up: condition A froze only
+    \PhaseFourCondAFrozenByIterFour/\PhaseFourNTotal sentences by iteration 4 vs.\ condition B's
+    \PhaseFourCondBFrozenByIterThree/\PhaseFourNTotal by iteration 3, and A's trajectory is smoother
+    --- span-level feedback (even self-generated) may matter more than feedback source
+    (self vs.\ external). To trust this more: rerun condition B with XCOMET (span-level)
+    instead of scalar COMET-KIWI to isolate granularity from source.
+  \item \textbf{Phases 5--6}: two candidate replacement models for the low-resource arm were
+    ruled out with direct evidence, not assumption. InkubaLM (\PhaseFiveInkubalmParamsB B
+    params) is a capability floor --- incoherent even in English regardless of prompting.
+    BLOOMZ needed \PhaseFiveNBugsFixedBloomzInkubalm mechanical fixes to reach a fair test,
+    and then failed on resource-exposure grounds, not reliability grounds (see Phase 6 below).
+    \textbf{Net: the joint-necessity question is still untested on a model without a
+    disqualifying confound.}
+\end{itemize}
+
+\subsection*{Tangential but new: a pretraining-exposure floor}
+
+\begin{itemize}
+  \item \textbf{Phase 6}: BLOOMZ's clean-generation rate (l1\_baseline, manually categorized,
+    $n=10$/pair) tracks its ROOTS pretraining byte count monotonically across four orders of
+    magnitude: en-fr ($\PhaseSixEnfrRootsBytes$ bytes) $\to \PhaseSixEnfrCleanRatePct\%$ clean;
+    en-sw ($\PhaseSixEnswRootsBytes$ bytes) $\to \PhaseSixEnswCleanRatePct\%$; en-xh
+    ($\PhaseSixEnxhRootsBytes$ bytes) $\to \PhaseSixEnxhCleanRatePct\%$; en-zu
+    ($\PhaseSixEnzuRootsBytes$ bytes) $\to \PhaseSixEnzuCleanRatePct\%$. Below some exposure
+    level the model doesn't attempt the target language at all --- it defaults to echoing the
+    English source (comprehension is intact; generation is not) --- rather than degrading
+    gracefully. To trust this more: only 4 points on the curve; need intermediate-exposure
+    languages (e.g.\ Yoruba, $\sim$90M bytes) to call it an actual regression rather than an
+    eyeballed trend.
+  \item Cross-checked the same question for Phase 3's Aya-101/mT5: German has
+    $\PhaseSixMtFiveDeTokensB$B tokens in mC4 vs.\ Hausa's $\PhaseSixMtFiveHaTokensB$B
+    ($\sim\PhaseSixMtFiveDeHaRatio\times$) --- so, unlike BLOOM's zero-exposure German, Phase 3's
+    en-de anchor is legitimate for the model actually used there. Same question, opposite answer
+    for the two models --- worth checking per-model going forward, not assuming either way.
+\end{itemize}
+
+\section*{Open decision}
+
+Three ways to get an unconfounded joint-necessity result:
+
+\begin{enumerate}
+  \item \textbf{Keep searching for an open model that is both conversation-tuned and covers
+    the target languages.} Two candidates already ruled out with evidence
+    (\PhaseFiveNBugsFixedBloomzInkubalm fixes deep, in BLOOMZ's case). No known third candidate
+    identified yet; another search cycle risks another multi-fix debugging odyssey with no
+    guaranteed payoff, but preserves an all-open-source stack.
+  \item \textbf{Split the two roles}: an API model for reasoning/orchestration, a
+    Church-fine-tuned NLLB model queried as the tool, rather than asking one model to both
+    translate and reason. This sidesteps Phase 6's exposure-floor problem entirely (NLLB is
+    purpose-built and trained at scale on exactly these low-resource pairs, unlike a
+    general-purpose LLM's incidental exposure), and arguably tests the theory's actual claim
+    (reasoning \emph{and} tool use, not one model doing both) more faithfully than the current
+    single-model design. Costs real API spend and departs from the fully-open constraint.
+  \item \textbf{Narrow scope}: run the clean joint-necessity test on one pair BLOOMZ can
+    already generate reliably (en-fr, $\PhaseSixEnfrCleanRatePct\%$ clean per Phase 6), and
+    treat low-resource generalization as explicit future work rather than this paper's claim.
+\end{enumerate}
+
+\textbf{Leaning toward option 2} --- it resolves Phase 6's confound directly rather than
+continuing to search for a single model that clears it. Option 3 is the fallback if preserving
+an open-only stack matters more than resolving the question now.
+
+\section*{What changes in the paper draft}
+
+\begin{itemize}
+  \item \textbf{Sec.~5.3 (QE-in-the-loop)}: needs an explicit caveat --- the proposed mechanism
+    doesn't work for \PhaseOneNPairsFlagged/\PhaseOneNPairsTotal tested low-resource pairs;
+    reframe as an open problem, not a solved detail.
+  \item \textbf{Sec.~5.1 (triggering)}: same treatment --- cheap source-side features show no
+    signal; needs either a caveat or a note that only crude implementations have been ruled
+    out.
+  \item \textbf{Sec.~1 (motivation)}: add the pretraining-exposure-floor finding (Phase 6) as a
+    distinct failure mode from reasoning/tool insufficiency --- ``low-resource'' can mean
+    ``the base model never learned to generate this language at all,'' independent of any
+    agentic scaffolding.
+  \item \textbf{Core joint-necessity claim}, wherever stated: needs a
+    ``confounded/untested cleanly'' framing --- not silence, not overclaiming from Phase 3's
+    suggestive-but-confounded numbers.
+\end{itemize}
+
+\appendix
+\section*{Appendix: debugging record (compressed)}
+
+\begin{itemize}
+  \item \textbf{Aya-101 (Phase 3)}: T5 seq2seq, no chat template; multi-turn context handled by
+    flattening to a role-tagged transcript. Worked for single-turn conditions; degenerated for
+    the 4-step CoT chain (see verbatim-repeat numbers above).
+  \item \textbf{Refine-step scoring bug (Phase 4)}: Qwen2.5-32B's refine responses were often
+    full English explanations (``Given the feedback\ldots the revised sentence would
+    be:\ldots''), and the entire response was being scored as the translation --- produced a
+    fake collapse from $\PhaseFourRefineBugFirstRunIterZeroCometkiwi \to \PhaseFourRefineBugFirstRunIterOneCometkiwi$
+    COMET-KIWI. Fixed with an explicit ``output only the translation'' instruction plus a
+    post-hoc extractor, validated against the original buggy data
+    ($\PhaseFourExtractFixSuccessCount$/$\PhaseFourExtractFixTotalCount$ cleaned correctly)
+    before re-running.
+  \item \textbf{BLOOMZ/InkubaLM (Phase 5)}: \PhaseFiveNBugsFixedBloomzInkubalm fixes in
+    sequence --- missing pre-download, an outdated KV-cache code path in InkubaLM's custom
+    model class, partial gated-repo caching, a context-window miscalculation, role-tag framing
+    that made both models echo prompt boilerplate instead of translating, a completion-cue
+    removal that caused empty output, a misdiagnosed repetition-penalty fix, a cue-induced
+    short-answer truncation bug, and finally a genuine reliability problem (inconsistent
+    correct-translation-vs.-source-echo behavior) that was not further fixable. An earlier full
+    run that looked like an interesting contradiction of Phase 3 was explicitly retracted once
+    these bugs were understood --- flagged as uncitable in \texttt{phase\_5\_summary.md} rather
+    than left standing.
+  \item \textbf{ROOTS-table correction (Phase 6)}: a secondary characterization claimed
+    Xhosa/Zulu were entirely absent from BLOOM's pretraining data. Checked the primary source
+    (BLOOM paper, Table 1) directly --- both are present with real, if small, byte counts
+    ($\PhaseSixEnxhRootsBytes$ / $\PhaseSixEnzuRootsBytes$ bytes respectively). The claim that
+    German has zero presence, however, held up on the same check --- and turned out to be the
+    more consequential finding (Phase 3's/Phase 5's en-de anchor question, resolved oppositely
+    for the two models involved).
+\end{itemize}
+
+\end{document}

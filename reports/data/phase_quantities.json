@@ -1,0 +1,91 @@
+{
+  "_source": "Every value here is copied verbatim from results/phase_{1..6}_summary.md — this file is the single source of truth for the advisor report; do not hand-edit numbers in the .tex.",
+
+  "phase1": {
+    "ha_spearman": 0.115, "ha_ci_lo": 0.102, "ha_ci_hi": 0.127, "ha_n": 23983,
+    "km_spearman": 0.457, "km_ci_lo": 0.434, "km_ci_hi": 0.480, "km_n": 4722,
+    "ps_spearman": 0.295, "ps_ci_lo": 0.269, "ps_ci_hi": 0.321, "ps_n": 4611,
+    "xh_spearman": 0.342, "xh_ci_lo": 0.307, "xh_ci_hi": 0.378, "xh_n": 2502,
+    "zu_spearman": 0.247, "zu_ci_lo": 0.212, "zu_ci_hi": 0.283, "zu_n": 2968,
+    "ende_benchmark_spearman": 0.57,
+    "flag_threshold": 0.3,
+    "n_pairs_flagged": 3,
+    "n_pairs_total": 5
+  },
+
+  "phase2": {
+    "oov_pooled_pearson": -0.33, "oov_pooled_auc": 0.513,
+    "oov_perlang_lo": -0.045, "oov_perlang_hi": 0.021,
+    "sentlen_pooled_pearson": 0.19, "sentlen_pooled_auc": 0.503,
+    "idiom_pooled_pearson": -0.07, "idiom_pooled_auc": 0.517,
+    "model_universal_auc": 0.513, "model_universal_n": 38786,
+    "model_idiom_auc": 0.520,
+    "model_full_auc": 0.564, "model_full_n": 10812,
+    "auc_chance": 0.5
+  },
+
+  "phase3": {
+    "model": "Aya-101",
+    "n_sentences_per_pair": 100,
+    "ende_baseline_cometkiwi": 0.804, "ende_baseline_comet": 0.821, "ende_baseline_chrf": 53.3,
+    "ende_cot_cometkiwi": 0.766, "ende_cot_comet": 0.782, "ende_cot_chrf": 50.4,
+    "ende_tool_cometkiwi": 0.819, "ende_tool_comet": 0.843, "ende_tool_chrf": 59.5,
+    "ende_cottool_cometkiwi": 0.720, "ende_cottool_comet": 0.733, "ende_cottool_chrf": 48.2,
+    "enha_baseline_cometkiwi": 0.609, "enha_baseline_comet": 0.762, "enha_baseline_chrf": 42.2,
+    "enha_cot_cometkiwi": 0.563, "enha_cot_comet": 0.698, "enha_cot_chrf": 35.9,
+    "enha_tool_cometkiwi": 0.602, "enha_tool_comet": 0.780, "enha_tool_chrf": 45.5,
+    "enha_cottool_cometkiwi": 0.576, "enha_cottool_comet": 0.736, "enha_cottool_chrf": 40.5,
+    "gap_cottool_vs_cot_ende_cometkiwi": -0.046,
+    "gap_cottool_vs_cot_enha_cometkiwi_lo": 0.013, "gap_cottool_vs_cot_enha_cometkiwi_hi": 0.038,
+    "gap_cottool_vs_tool_ende_cometkiwi": -0.099,
+    "gap_cottool_vs_tool_enha_cometkiwi": -0.027,
+    "gap_test_p_lo": 0.004, "gap_test_p_hi": 0.024,
+    "cot_verbatim_repeat_ende": 80, "cot_verbatim_repeat_enha": 72,
+    "cottool_verbatim_repeat_ende": 78, "cottool_verbatim_repeat_enha": 86,
+    "verbatim_repeat_denominator": 100
+  },
+
+  "phase4": {
+    "model": "Qwen2.5-32B-Instruct",
+    "n_sentences": 100,
+    "n_iterations": 4,
+    "condA_iter0_cometkiwi": 0.810, "condA_iter1_cometkiwi": 0.822, "condA_iter2_cometkiwi": 0.832,
+    "condA_iter3_cometkiwi": 0.828, "condA_iter4_cometkiwi": 0.832,
+    "condB_iter0_cometkiwi": 0.810, "condB_iter1_cometkiwi": 0.809, "condB_iter2_cometkiwi": 0.818,
+    "condB_iter3_cometkiwi": 0.809, "condB_iter4_cometkiwi": 0.816,
+    "condA_gain_iter1_to_peak_cometkiwi": 0.011, "condA_peak_iteration": 4,
+    "condB_gain_iter1_to_peak_cometkiwi": 0.010, "condB_peak_iteration": 2,
+    "condA_frozen_by_iter4": 31, "condB_frozen_by_iter3": 48,
+    "n_total": 100,
+    "refine_bug_first_run_iter0_cometkiwi": 0.71, "refine_bug_first_run_iter1_cometkiwi": 0.53,
+    "refine_bug_fixed_iter0_cometkiwi": 0.810,
+    "extract_fix_success_count": 287, "extract_fix_total_count": 290
+  },
+
+  "phase5": {
+    "bloomz_model": "bigscience/bloomz-7b1",
+    "inkubalm_model": "lelapa/InkubaLM-0.4B",
+    "inkubalm_params_b": 0.4,
+    "n_bugs_fixed_bloomz_inkubalm": 9,
+    "aya23_expanse_n_languages": 23
+  },
+
+  "phase6": {
+    "enfr_roots_bytes": 208242620434,
+    "ensw_roots_bytes": 236482543,
+    "enxh_roots_bytes": 14304074,
+    "enzu_roots_bytes": 8511561,
+    "bloom_de_roots_bytes": 0,
+    "enfr_clean_n": 10, "enfr_total_n": 10,
+    "ensw_clean_n": 5, "ensw_total_n": 10,
+    "enxh_clean_n": 0, "enxh_total_n": 10,
+    "enzu_clean_n": 0, "enzu_total_n": 10,
+    "enfr_clean_rate_pct": 100,
+    "ensw_clean_rate_pct": 50,
+    "enxh_clean_rate_pct": 0,
+    "enzu_clean_rate_pct": 0,
+    "mt5_de_tokens_b": 347, "mt5_ha_tokens_b": 0.2,
+    "mt5_de_pct": 3.05, "mt5_ha_pct": 0.33,
+    "mt5_de_ha_ratio": 1735
+  }
+}
