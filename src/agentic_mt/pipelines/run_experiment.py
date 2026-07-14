@@ -27,7 +27,10 @@ from agentic_mt.pipelines.scoring import score_all
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
 logger = logging.getLogger(__name__)
 
-TARGET_LANG_NAME = {"en-de": "German", "en-ha": "Hausa", "en-xh": "Xhosa", "en-zu": "Zulu", "en-sw": "Swahili"}
+TARGET_LANG_NAME = {
+    "en-de": "German", "en-ha": "Hausa", "en-xh": "Xhosa", "en-zu": "Zulu",
+    "en-sw": "Swahili", "en-fr": "French",
+}
 SOURCE_LANG_NAME = "English"
 
 # Conditions that need a retrieved TM match.

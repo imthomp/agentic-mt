@@ -29,6 +29,7 @@ results/**
 !results/phase_3_summary.md
 !results/phase_4_summary.md
 !results/phase_5_summary.md
+!results/phase_6_summary.md
 
 # SLURM job logs
 logs/
