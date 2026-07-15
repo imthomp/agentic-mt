@@ -42,7 +42,10 @@
     "gap_test_p_lo": 0.004, "gap_test_p_hi": 0.024,
     "cot_verbatim_repeat_ende": 80, "cot_verbatim_repeat_enha": 72,
     "cottool_verbatim_repeat_ende": 78, "cottool_verbatim_repeat_enha": 86,
-    "verbatim_repeat_denominator": 100
+    "verbatim_repeat_denominator": 100,
+    "bestofn_n": 5,
+    "bestofn_enha_cometkiwi": 0.666,
+    "bestofn_enha_single_sample_cometkiwi": 0.581
   },
 
   "phase4": {

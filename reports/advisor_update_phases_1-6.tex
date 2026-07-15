@@ -23,7 +23,7 @@
 
 \begin{document}
 \maketitle
-\vspace{-3em}
+\vspace{-2em}
 
 \noindent\textit{Six phases testing the two-pillar theory (slow thinking + tool use, jointly
 necessary, most valuable for low-resource pairs). Code and full per-phase logs:
@@ -82,13 +82,18 @@ jointly-controlled family.}\normalsize
 \begin{itemize}
   \item \textbf{QE-in-the-loop (Sec.~5.3) is not viable as specified for most of the
     5 low-resource pairs tested (ha/km/ps/xh/zu).} An en-de benchmark of $\approx\PhaseOneEndeBenchmarkSpearman$ sets the bar these
-    pairs miss. To trust more: extend beyond the five pairs with real human judgments; current
-    coverage is a hard ceiling on what we can check.
-  \item \textbf{Source-side triggering (Sec.~5.1) shows no signal from cheap features on
-    these same 5 pairs,} against a chance baseline of $\PhaseTwoAucChance$. The pooled OOV correlation evaporates to
-    $\PhaseTwoOovPerlangLo$--$\PhaseTwoOovPerlangHi$ once controlled for language. To trust
-    more: a real domain classifier and a frequency-list OOV measure before calling triggering a
-    dead end rather than an implementation gap.
+    pairs miss. This confirms, rather than merely illustrates, the risk the proposal itself
+    flags in Sec.~5.3 (``reference-free QE models... must be adapted for language pairs with
+    limited QE training data'') --- the mechanism's foundation is measurably weaker exactly
+    where the theory says it should matter most. To trust more: extend beyond the five pairs
+    with real human judgments; current coverage is a hard ceiling on what we can check.
+  \item \textbf{Source-side triggering (Sec.~5.1) shows no signal from three of the five
+    features that section names} (OOV rate, sentence length, idiomatic density) \textbf{on
+    these same 5 pairs,} against a chance baseline of $\PhaseTwoAucChance$. The pooled OOV
+    correlation evaporates to $\PhaseTwoOovPerlangLo$--$\PhaseTwoOovPerlangHi$ once controlled
+    for language. To trust more: a real domain classifier and a frequency-list OOV measure
+    (the two named features not yet tested) before calling triggering a dead end rather than
+    an implementation gap.
 \end{itemize}
 
 \subsection*{The central joint-necessity claim: confounded, not resolved}
@@ -101,7 +106,11 @@ jointly-controlled family.}\normalsize
     reasoning-quality comparison before we even look at scores. Given that: the raw numbers
     (tool-alone wins both pairs; CoT scores lowest; gap differs by resource level,
     $p=\PhaseThreeGapTestPLo$--$\PhaseThreeGapTestPHi$) describe what happened, but should be read
-    as ``a broken CoT chain scored worse,'' not as evidence about reasoning per se.
+    as ``a broken CoT chain scored worse,'' not as evidence about reasoning per se. Worth
+    flagging even with that discount: CoT+Tool scored below Tool-alone on \emph{both} pairs ---
+    the joint-necessity claim predicts the combination should beat either pillar alone, and the
+    raw direction here runs the other way. The degeneracy is a sufficient explanation, but we
+    haven't shown it's the \emph{only} one; this isn't evidence for the theory even discounted.
   \item \textbf{Phase 4}: matches Feng et al.'s actual TEaR pattern, not the early-peak
     hypothesis we set out to test (that pattern belongs to a different paper). Secondary
     finding: condition A froze only \PhaseFourCondAFrozenByIterFour/\PhaseFourNTotal{} sentences
@@ -111,10 +120,26 @@ jointly-controlled family.}\normalsize
     granularity from source. \emph{Relevance to the central claim:} this phase tests refinement
     quality, not joint necessity directly --- it neither confirms nor challenges the central
     claim, though the granularity finding is worth folding into whichever joint-necessity test
-    runs next.
+    runs next. \emph{Gap against the proposal:} Sec.~5.3 predicts the undirected-vs-QE-directed
+    refinement gap ``should be largest in low-resource settings''; this phase tested exactly
+    those two conditions but only on en-de, so it cannot speak to that specific prediction ---
+    still open.
   \item \textbf{Phases 5--6}: two replacement-model candidates ruled out with direct evidence,
     not assumption (see table). \textbf{Net: the joint-necessity question is still untested on
     a model without a disqualifying confound.}
+  \item \textbf{New: best-of-$\PhaseThreeBestofnN$ Level-1 baseline, filling Sec.~7's (b)-vs-(c)
+    gap.} Sec.~7 specifies comparing inference-time-scaled Level 1 (best-of-$N$/MBR) against
+    full agentic Level 2 as ``particularly important''; none of Phase 3's four conditions did
+    this. Ran it for en-ha: best-of-$\PhaseThreeBestofnN$ temperature sampling, no tools, no
+    reasoning, scored $\PhaseThreeBestofnEnhaCometkiwi$ COMET-KIWI --- higher than \emph{all
+    four} architected conditions, including tool-alone ($0.602$). Taken at face value this is
+    an uncomfortable answer to Sec.~7's question: compute alone beat architecture. \textbf{But
+    it can't be taken at face value:} selection here used COMET-KIWI as judge, and Phase 1 measured COMET-KIWI's correlation with real human judgment for Hausa specifically at just
+    $\PhaseOneHaSpearman$ --- the weakest of all five pairs. This may be rewarding samples that
+    exploit COMET-KIWI's blind spots rather than ones that are genuinely better. Needs
+    rerunning scored by something Phase 1 didn't already flag as unreliable for this pair
+    before treating the result as settled --- but it's the check Sec.~7 asks for, and as
+    measured it did not favor the architecture.
 \end{itemize}
 
 \begin{center}
@@ -134,7 +159,13 @@ degenerate-repeat confound described above, not a clean reasoning-vs-baseline co
     --- so this looks like a threshold somewhere between 90M and 236M bytes, not the smooth
     dose-response curve the four-point version suggested. To trust more: still only 5 points
     (this model only); a language between 90M and 236M bytes would tell us whether this is a
-    sharp cutoff or just a steep slope.
+    sharp cutoff or just a steep slope. \emph{Possible challenge to Sec.~4:} the below-floor
+    outputs aren't flawed translations a tool could correct --- they're the English source
+    echoed back, meaning there's no partial competence left to ground. Sec.~4 argues external
+    resources carry \emph{more} marginal value as neural coverage thins; that argument
+    implicitly assumes some translation attempt exists to augment. If this generalizes beyond
+    BLOOMZ, the marginal-value argument may have a floor below which it inverts to zero, not
+    just a low: the tool would have to generate the whole translation, not inform one.
   \item Cross-checked for Phase 3's Aya-101/mT5: German has $\PhaseSixMtFiveDeTokensB$B tokens
     in mC4 vs.\ Hausa's $\PhaseSixMtFiveHaTokensB$B ($\sim\PhaseSixMtFiveDeHaRatio\times$) --- so
     Phase 3's en-de anchor \emph{is} legitimate for that model, unlike BLOOM's zero-exposure
@@ -154,6 +185,15 @@ threshold on \PhaseOneNPairsFlagged/\PhaseOneNPairsTotal{} tested pairs, source-
 shows no signal on those same pairs, and BLOOMZ's generation reliability is gated by pretraining
 exposure (below, now five points). These are usable in the paper draft now, independent of which
 option we pick next.
+
+\subsection*{Scope against the proposal}
+
+Two honesty notes. First, ha/km/ps/xh/zu were chosen because real WMT human judgments exist
+for them, not because they're confirmed as the Matrix Lab's actual target portfolio --- worth
+checking those match before leaning on these results for portfolio-specific decisions. Second,
+these six phases only touch Secs.~5.1--5.3; document-level session management (Sec.~5.4),
+parallel hypothesis exploration (Sec.~5.5), and interactive interpretation with clarification
+(Sec.~5.6, the clinical MT program's home turf) are untested here.
 
 \section*{Open decision}
 
@@ -189,6 +229,11 @@ open-only stack matters more than resolving the question now.
     from reasoning/tool insufficiency.
   \item \textbf{Core joint-necessity claim}, wherever stated: needs
     ``confounded/untested cleanly'' framing --- not silence, not overclaiming from Phase 3.
+  \item \textbf{Sec.~7 (evaluation protocol)}: the (b)-vs-(c) best-of-$N$ comparison it
+    specifies is now partially filled in (en-ha, one model) --- as measured, compute alone
+    beat every architected condition, though the QE judge used for selection is one Phase 1
+    already flagged as unreliable for this pair. Needs a trustworthy-metric rerun before this
+    result can inform the draft either way.
 \end{itemize}
 
 \appendix

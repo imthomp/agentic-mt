@@ -167,6 +167,48 @@ resource level per se, since Aya-101's multi-turn brittleness may itself
 interact with resource level in ways this experiment can't cleanly separate
 from a real reasoning effect.
 
+## Addendum: best-of-N Level-1 baseline (proposal Sec. 7's missing comparison)
+
+The agentic-MT proposal (`related-work/Research Idea_ Agentic Machine Translation.pdf`,
+Sec. 7) specifies that evaluating agentic MT should compare (b) inference-time-scaled
+Level 1 (best-of-N, MBR) against (c) full agentic Level 2, calling this "particularly
+important" — does the architecture add value beyond just spending more compute? None of
+the four conditions above answer that; they're all architecture-vs-architecture, all
+greedy decoding.
+
+Ran a best-of-5 baseline for en-ha (`scripts/phase3_bestofn.py`): same 100 sentences/seed,
+same model (Aya-101), plain L1_baseline prompt, 5 independent temperature=0.7 samples per
+sentence, best of the 5 selected by reference-free COMET-KIWI:
+
+| Condition | Mean COMET-KIWI (en-ha) |
+|---|---|
+| L1_baseline (greedy, original Phase 3) | 0.609 |
+| L1_baseline (single temp=0.7 sample, this run) | 0.581 |
+| **L1_baseline best-of-5 (temp=0.7)** | **0.666** |
+| L1_cot (original) | 0.563 |
+| L1_tool (original) | 0.602 |
+| L1_cot_tool (original) | 0.576 |
+
+Taken at face value, best-of-5 plain sampling — no tools, no reasoning, just more
+compute — beats every one of Phase 3's four architected conditions, including the
+tool-augmented one. That's the uncomfortable answer to Sec. 7's question, if taken at
+face value.
+
+**It can't be taken at face value.** The best-of-N selection here uses COMET-KIWI as the
+judge, and Phase 1 measured COMET-KIWI's correlation with real human judgment for Hausa
+specifically at Spearman 0.115 — below the 0.3 usability threshold, the weakest of all
+five low-resource pairs tested. Best-of-5-by-COMET-KIWI on this pair may just be selecting
+whichever sample happens to exploit COMET-KIWI's blind spots, not whichever is genuinely
+best. This experiment can't settle Sec. 7's (b)-vs-(c) comparison until it's rerun scored
+by something Phase 1 didn't already flag as unreliable for en-ha specifically (real human
+judgment, or a QE pair with a verified-usable score like km/xh) — but the result as
+measured is exactly the kind of check the proposal calls for, and it came back
+unfavorable to the architecture, which is itself worth taking seriously rather than
+setting aside because the caveat is convenient.
+
+- Code: `src/agentic_mt/pipelines/llm.py`'s `sample_n()`, `scripts/phase3_bestofn.py`
+- Outputs: `results/phase3_bestofn_enha.jsonl`, `results/phase3_bestofn_enha_scores.json`
+
 ## Where things live
 
 - Code: `src/agentic_mt/pipelines/{llm,data,retrieval,scoring,analysis,run_experiment}.py`,

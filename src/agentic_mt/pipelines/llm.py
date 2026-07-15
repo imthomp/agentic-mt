@@ -188,3 +188,35 @@ def chat_turn(
     )
     completion = tokenizer.decode(output[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
     return completion.strip()
+
+
+def sample_n(
+    messages: list[dict],
+    model_name: str,
+    n: int,
+    temperature: float = 0.7,
+    max_new_tokens: int = 256,
+) -> list[str]:
+    """Draw n independent samples for a single-turn prompt via temperature
+    sampling -- for a best-of-N Level-1 baseline (proposal Sec. 7's "(b)
+    inference-time scaled Level 1" condition), not used by any of the four
+    L1 conditions, which are all greedy (do_sample=False in chat_turn)."""
+    model, tokenizer, is_seq2seq, has_chat_template, max_position_embeddings = _load(model_name)
+    budget = _context_budget(tokenizer, max_new_tokens, max_position_embeddings)
+    extra_kwargs = GENERATE_KWARGS_OVERRIDES.get(model_name, {})
+
+    if is_seq2seq or not has_chat_template:
+        plain = model_name in PLAIN_INSTRUCTION_MODELS
+        prompt = _flatten_messages(messages, plain=plain)
+    else:
+        prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+
+    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=budget).to(model.device)
+    output = model.generate(
+        **inputs, max_new_tokens=max_new_tokens, do_sample=True, temperature=temperature,
+        num_return_sequences=n, pad_token_id=tokenizer.eos_token_id, **extra_kwargs,
+    )
+    if is_seq2seq:
+        return [tokenizer.decode(o, skip_special_tokens=True).strip() for o in output]
+    prompt_len = inputs["input_ids"].shape[1]
+    return [tokenizer.decode(o[prompt_len:], skip_special_tokens=True).strip() for o in output]
