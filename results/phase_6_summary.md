@@ -64,6 +64,47 @@ perfect English comprehension, just defaults to producing English rather
 than attempting the target language) scales with how much of that
 language it actually saw during pretraining.
 
+## Step 1c: added a fourth data point (Yoruba) to fill the gap between Swahili and Xhosa/Zulu
+
+Per this file's own "Next steps" (below, written before this addition): only 3-5 points on
+the ROOTS-bytes-vs-clean-rate curve made "monotonic" suggestive, not established, and an
+intermediate-exposure language between Swahili (236M bytes) and Xhosa/Zulu (14.3M/8.5M
+bytes) was the specific gap that would test it. Yoruba (89.7M ROOTS bytes, confirmed against
+the primary source — BLOOM paper, Table 1) sits in exactly that gap. Ran the same
+smoke-test methodology: 10 sentences, `bigscience/bloomz-7b1`, `l1_baseline` only, hand
+read and categorized (`results/phase_6_smoketest/smoketest_outputs_yo.jsonl`):
+
+| Pair | ROOTS bytes | clean | source_echo | repetition_loop/garbled |
+|---|---|---|---|---|
+| en-yo | 89,695,835 | **0** | 5 | 5 |
+
+**This does not confirm the monotonic story — it complicates it.** Yoruba has ~6x more
+ROOTS bytes than Xhosa and ~10x more than Zulu, but its clean rate (0%) matches those two,
+not the ~30-40% a straight interpolation between Swahili's 50% and Xhosa/Zulu's 0% would
+predict. Two of the ten outputs were real attempts at Yoruba before collapsing into a
+repetition loop (closer to Zulu's one exceptional case than to Swahili's partial successes),
+but none finished clean. Revised ranking:
+
+| Pair | ROOTS bytes | Clean rate |
+|---|---|---|
+| en-fr | 208B | 100% |
+| en-sw | 236M | 50% |
+| en-yo | 89.7M | 0% |
+| en-xh | 14.3M | 0% |
+| en-zu | 8.5M | 0% |
+
+This is still a monotonic *non-increasing* relationship (clean rate never goes up as bytes
+go down), so the qualitative floor-effect claim survives. But the *smooth dose-response*
+framing from Step 1b — "a genuinely clean, interpretable result... scales with how much of
+that language it actually saw" — does not survive Yoruba unchanged: the curve looks more
+like a sharp drop somewhere between 236M and 89.7M bytes than a gradual ramp, and 89.7M was
+supposed to be the point that would distinguish those two shapes. Independent support for
+Yoruba being a genuine hard case for BLOOM, not just noise: the BLOOM paper's own Flores-101
+results call out Yoruba specifically ("results are very poor between Swahili and Yoruba...
+under-represented in BLOOM's training data") and its multilingual probing results (Table 12)
+list Yoruba among the lowest-scoring languages of the 17 probed. Cross-checked before citing,
+per this project's standing discipline.
+
 ## Decision (per the plan's Step 2 gate)
 
 **Not proceeding to Step 3** (the full 4-condition en-fr/en-xh/en-zu run)
@@ -83,33 +124,39 @@ pretraining actually saw.
 ## Interpretation, and how this connects to the rest of the project
 
 This is possibly the single cleanest quantitative finding across Phases
-1-6: **a model's raw pretraining exposure to a language is a hard
-prerequisite for coherent generation in it, and the relationship looks
-continuous, not binary, at least across these four points.** It reframes
-something Phase 3 and Phase 5 were both implicitly wrestling with —
-"does this model cover the language" — from a checkbox (is the ISO code in
-a language tag list) into a quantity that predicts failure rate. Phase 3's
-Aya-101/en-ha result and Phase 5's whole BLOOMZ effort were both operating
-on the checkbox version of this question; this phase is the first place in
-the project that actually measured the dose-response curve underlying it.
+1-6, revised after Step 1c: **a model's raw pretraining exposure to a
+language is a hard prerequisite for coherent generation in it, but the
+relationship looks like a floor/threshold effect, not a smooth
+dose-response curve** — Yoruba's 89.7M bytes (more than Xhosa/Zulu, well
+below Swahili) still produced 0% clean output, matching the two
+lowest-exposure languages rather than landing between them and Swahili.
+The directional claim (less exposure never produces a higher clean rate)
+still holds across all five points; the shape claim (gradual, continuous
+scaling) does not, and Step 1b's language asserting a smooth scaling
+relationship was overclaiming from four widely-spaced points. It still
+reframes something Phase 3 and Phase 5 were both implicitly wrestling
+with — "does this model cover the language" — from a checkbox (is the
+ISO code in a language tag list) into a quantity that predicts failure
+rate, just with a sharper, less continuous shape than first thought.
 
 ## Where things live
 
 - Smoke-test scripts: `scripts/phase6_smoketest.py`,
-  `scripts/phase6_smoketest_sw.py`
+  `scripts/phase6_smoketest_sw.py`, `scripts/phase6_smoketest_yo.py`
 - Raw + categorized outputs:
-  `results/phase_6_smoketest/{smoketest_outputs.jsonl,smoketest_outputs_sw.jsonl,categorized_all.jsonl,categorized_sw.jsonl}`
-- Data: `en-fr` added to `pipelines/data.py`'s `LOADERS` (FLORES-plus,
+  `results/phase_6_smoketest/{smoketest_outputs.jsonl,smoketest_outputs_sw.jsonl,smoketest_outputs_yo.jsonl,categorized_all.jsonl,categorized_sw.jsonl}`
+- Data: `en-fr`/`en-yo` added to `pipelines/data.py`'s `LOADERS` (FLORES-plus,
   same pattern as en-xh/en-zu/en-sw) and `run_experiment.py`'s
   `TARGET_LANG_NAME`.
 
 ## Next steps (not yet done)
 
-- With only 3-5 points on the ROOTS-bytes-vs-clean-rate curve, the
-  "monotonic" claim is suggestive, not statistically established — more
-  languages at intermediate byte counts (e.g. Yoruba at 89.7M, between
-  Swahili and Xhosa) would let this become an actual regression rather
-  than an eyeballed trend.
+- Step 1c added the planned intermediate point (Yoruba) and it complicated
+  the story rather than confirming it — the apparent drop now sits
+  somewhere between Swahili's 236M and Yoruba's 89.7M bytes, a factor of
+  ~2.6x. A language in that narrower gap (or several) would be needed to
+  tell whether this is a sharp threshold or just a steeper-than-expected
+  slope; five points still isn't enough to fit a real curve shape.
 - If pursuing the joint-necessity question further with an open model,
   this phase's method (check the primary pretraining-corpus table, don't
   trust a language-tag list) should be applied *before* selecting a model,

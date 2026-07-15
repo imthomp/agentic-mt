@@ -46,6 +46,7 @@ def fig_exposure_floor(data):
     points = [
         ("en-fr", p6["enfr_roots_bytes"], p6["enfr_clean_rate_pct"]),
         ("en-sw", p6["ensw_roots_bytes"], p6["ensw_clean_rate_pct"]),
+        ("en-yo", p6["enyo_roots_bytes"], p6["enyo_clean_rate_pct"]),
         ("en-xh", p6["enxh_roots_bytes"], p6["enxh_clean_rate_pct"]),
         ("en-zu", p6["enzu_roots_bytes"], p6["enzu_clean_rate_pct"]),
     ]
@@ -60,7 +61,10 @@ def fig_exposure_floor(data):
 
     # en-xh/en-zu sit close together on the log axis at y=0 -- stack their
     # labels above/below to avoid collision instead of a uniform offset.
-    label_offsets = {"en-fr": (0, -14), "en-sw": (0, 8), "en-xh": (0, 10), "en-zu": (0, -16)}
+    label_offsets = {
+        "en-fr": (0, -14), "en-sw": (0, 12),
+        "en-yo": (0, 18), "en-xh": (0, -16), "en-zu": (-4, 8),
+    }
     for lbl, x, y in points:
         ax.annotate(lbl, (x, y), textcoords="offset points", xytext=label_offsets[lbl],
                     ha="center", fontsize=8.5, color=SECONDARY_INK)

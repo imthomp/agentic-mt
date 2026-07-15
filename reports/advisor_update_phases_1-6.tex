@@ -34,9 +34,9 @@ necessary, most valuable for low-resource pairs). Code and full per-phase logs:
 
 The central joint-necessity claim has not been confirmed or falsified --- every direct test
 has hit a model confound first. We do have real evidence against the simplest instantiations
-of two supporting mechanisms (QE-in-the-loop, source-side triggering), and a new finding, from one model across four language points (BLOOMZ, Phase 6), that
-raw pretraining exposure to a language can be a hard gate on generation, separate from anything
-the agentic scaffolding does.
+of two supporting mechanisms (QE-in-the-loop, source-side triggering), and a new finding, from one model across five language points (BLOOMZ, Phase 6), that
+raw pretraining exposure to a language can be a hard gate on generation --- more a threshold
+effect than a smooth curve --- separate from anything the agentic scaffolding does.
 
 \section*{Phase-by-phase}
 
@@ -54,7 +54,9 @@ the agentic scaffolding does.
   No feature or model beats chance (AUC $\PhaseTwoModelUniversalAuc$--$\PhaseTwoModelFullAuc$); pooled OOV signal ($r=\PhaseTwoOovPooledPearson$) is a Simpson's-paradox artifact \\
 3: Joint necessity &
   Aya-101, 4 conditions $\times$ en-de/en-ha $\times$ \PhaseThreeNSentencesPerPair{} sentences &
-  Tool-alone wins both pairs; CoT hurts; gap differs by resource level ($p=\PhaseThreeGapTestPLo$--$\PhaseThreeGapTestPHi$) --- but CoT chain degenerates (see Fig.~1) \\
+  CoT chain degenerates into verbatim repeats in most sentences (Fig.~1), confounding the
+  comparison; raw scores show tool-alone highest and CoT lowest ($p=\PhaseThreeGapTestPLo$--$\PhaseThreeGapTestPHi$
+  for the resource-level gap), but this likely reflects the degeneracy, not reasoning quality \\
 4: Refinement &
   Qwen2.5-32B, TEaR self-critique vs.\ external-QE refine, en-de, \PhaseFourNSentences{} sentences, \PhaseFourNIterations{} iterations &
   Neither condition peaks-then-declines; both improve gradually to iteration \PhaseFourCondAPeakIteration, matching TEaR's actual reported pattern \\
@@ -62,13 +64,18 @@ the agentic scaffolding does.
   Tried BLOOMZ, InkubaLM as open, conversation-tuned models covering ha/km/ps/xh/zu &
   Both ruled out: InkubaLM incoherent even in English (\PhaseFiveInkubalmParamsB{} B params); BLOOMZ needed \PhaseFiveNBugsFixedBloomzInkubalm{} fixes, then failed on exposure grounds \\
 6: Exposure floor &
-  BLOOMZ smoke test, en-fr/en-sw/en-xh/en-zu, 10 sentences/pair, hand-categorized &
-  Clean-generation rate tracks ROOTS pretraining bytes monotonically, this model only (see Fig.~2) \\
+  BLOOMZ smoke test, en-fr/en-sw/en-yo/en-xh/en-zu, 10 sentences/pair, hand-categorized &
+  Clean-generation rate never rises as pretraining bytes fall, but drops sharply rather than
+  smoothly, this model only (see Fig.~2) \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \section*{Findings, by implication}
+
+\noindent\footnotesize\textit{None of the thresholds/p-values below correct for multiple
+comparisons across the six phases --- read each as suggestive on its own terms, not as part of a
+jointly-controlled family.}\normalsize
 
 \subsection*{Challenges to specific proposed mechanisms}
 
@@ -90,16 +97,21 @@ the agentic scaffolding does.
   \item \textbf{Phase 3}: Aya-101 is not conversation-tuned, and its CoT chain produced
     byte-identical draft\slash refine\slash proofread output in
     \PhaseThreeCotVerbatimRepeatEnde--\PhaseThreeCottoolVerbatimRepeatEnha{} of
-    \PhaseThreeVerbatimRepeatDenominator{} sentences (Fig.~1). The ``CoT hurts'' result is real in
-    the sense that it's what happened, but is confounded with architecture, not a clean test of
-    reasoning per se.
+    \PhaseThreeVerbatimRepeatDenominator{} sentences (Fig.~1) --- this degeneracy confounds any
+    reasoning-quality comparison before we even look at scores. Given that: the raw numbers
+    (tool-alone wins both pairs; CoT scores lowest; gap differs by resource level,
+    $p=\PhaseThreeGapTestPLo$--$\PhaseThreeGapTestPHi$) describe what happened, but should be read
+    as ``a broken CoT chain scored worse,'' not as evidence about reasoning per se.
   \item \textbf{Phase 4}: matches Feng et al.'s actual TEaR pattern, not the early-peak
     hypothesis we set out to test (that pattern belongs to a different paper). Secondary
     finding: condition A froze only \PhaseFourCondAFrozenByIterFour/\PhaseFourNTotal{} sentences
     by iteration 4 vs.\ condition B's \PhaseFourCondBFrozenByIterThree/\PhaseFourNTotal{} by
     iteration 3, and A's trajectory is smoother --- span-level feedback may matter more than
     feedback source. To trust more: rerun condition B with XCOMET (span-level) to isolate
-    granularity from source.
+    granularity from source. \emph{Relevance to the central claim:} this phase tests refinement
+    quality, not joint necessity directly --- it neither confirms nor challenges the central
+    claim, though the granularity finding is worth folding into whichever joint-necessity test
+    runs next.
   \item \textbf{Phases 5--6}: two replacement-model candidates ruled out with direct evidence,
     not assumption (see table). \textbf{Net: the joint-necessity question is still untested on
     a model without a disqualifying confound.}
@@ -107,8 +119,8 @@ the agentic scaffolding does.
 
 \begin{center}
 \includegraphics[width=0.72\textwidth]{figures/phase3_conditions.pdf}\\
-{\footnotesize Figure 1: Phase 3 condition means (COMET-KIWI). Tool wins both pairs; CoT drops
-both --- but see the degeneracy caveat above.}
+{\footnotesize Figure 1: Phase 3 condition means (COMET-KIWI). CoT's low score reflects the
+degenerate-repeat confound described above, not a clean reasoning-vs-baseline comparison.}
 \end{center}
 
 \subsection*{Tangential but new: a pretraining-exposure floor}
@@ -116,9 +128,13 @@ both --- but see the degeneracy caveat above.}
 \begin{itemize}
   \item \textbf{Phase 6}: below some exposure level BLOOMZ doesn't attempt the target language
     at all --- it defaults to echoing the English source (comprehension intact, generation
-    not) --- rather than degrading gracefully. To trust more: only 4 points on the curve; need
-    intermediate-exposure languages (e.g.\ Yoruba, $\sim$90M bytes) to call it an actual
-    regression rather than an eyeballed trend.
+    not) --- rather than degrading gracefully. Adding Yoruba ($\sim$90M ROOTS bytes, between
+    Swahili's 236M and Xhosa/Zulu's 14.3M/8.5M) as the planned intermediate point produced
+    0\% clean output, matching Xhosa/Zulu rather than sitting between them and Swahili's 50\%
+    --- so this looks like a threshold somewhere between 90M and 236M bytes, not the smooth
+    dose-response curve the four-point version suggested. To trust more: still only 5 points
+    (this model only); a language between 90M and 236M bytes would tell us whether this is a
+    sharp cutoff or just a steep slope.
   \item Cross-checked for Phase 3's Aya-101/mT5: German has $\PhaseSixMtFiveDeTokensB$B tokens
     in mC4 vs.\ Hausa's $\PhaseSixMtFiveHaTokensB$B ($\sim\PhaseSixMtFiveDeHaRatio\times$) --- so
     Phase 3's en-de anchor \emph{is} legitimate for that model, unlike BLOOM's zero-exposure
@@ -128,8 +144,16 @@ both --- but see the degeneracy caveat above.}
 \begin{center}
 \includegraphics[width=0.68\textwidth]{figures/phase6_exposure_floor.pdf}\\
 {\footnotesize Figure 2: BLOOMZ clean-generation rate vs.\ ROOTS pretraining bytes (log scale),
-en-fr/en-sw/en-xh/en-zu.}
+en-fr/en-sw/en-yo/en-xh/en-zu. Note the drop between en-sw and en-yo, not a smooth ramp.}
 \end{center}
+
+\subsection*{What we know regardless of how the central claim resolves}
+
+Three results don't wait on an unconfounded joint-necessity test: QE-in-the-loop misses its
+threshold on \PhaseOneNPairsFlagged/\PhaseOneNPairsTotal{} tested pairs, source-side triggering
+shows no signal on those same pairs, and BLOOMZ's generation reliability is gated by pretraining
+exposure (below, now five points). These are usable in the paper draft now, independent of which
+option we pick next.
 
 \section*{Open decision}
 
@@ -169,6 +193,11 @@ open-only stack matters more than resolving the question now.
 
 \appendix
 \section*{Appendix: debugging record (compressed)}
+
+\noindent\footnotesize\textit{Every entry below is a bug that was caught only after it produced
+a confusing result. Phases 1 and 2's results have not had equivalent adversarial scrutiny applied
+to them --- treat their clean appearance with that base rate in mind, not as proof nothing is
+wrong.}\normalsize
 
 \begin{itemize}
   \item \textbf{Aya-101 (Phase 3)}: T5 seq2seq, no chat template; flattened multi-turn context

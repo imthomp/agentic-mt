@@ -70,6 +70,7 @@ LOADERS = {
     "en-zu": functools.partial(load_flores_pair, "zul_Latn"),
     "en-sw": functools.partial(load_flores_pair, "swh_Latn"),
     "en-fr": functools.partial(load_flores_pair, "fra_Latn"),
+    "en-yo": functools.partial(load_flores_pair, "yor_Latn"),
 }
 
 
