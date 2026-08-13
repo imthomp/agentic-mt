@@ -136,10 +136,20 @@ jointly-controlled family.}\normalsize
     an uncomfortable answer to Sec.~7's question: compute alone beat architecture. \textbf{But
     it can't be taken at face value:} selection here used COMET-KIWI as judge, and Phase 1 measured COMET-KIWI's correlation with real human judgment for Hausa specifically at just
     $\PhaseOneHaSpearman$ --- the weakest of all five pairs. This may be rewarding samples that
-    exploit COMET-KIWI's blind spots rather than ones that are genuinely better. Needs
-    rerunning scored by something Phase 1 didn't already flag as unreliable for this pair
-    before treating the result as settled --- but it's the check Sec.~7 asks for, and as
-    measured it did not favor the architecture.
+    exploit COMET-KIWI's blind spots rather than ones that are genuinely better. \textbf{Tried
+    to rerun on a QE-trustworthy low-resource pair (km, $r=0.457$) and found there isn't one:}
+    that correlation is measured km$\to$en, not en$\to$km --- Phase 1's data has no en-km rows
+    at all, and the same holds for ps (ps-en only) and xh/zu (xh-zu/zu-xh only, never against
+    English). Hausa is the \emph{only} tested pair with real en$\to$X human-judgment data, and
+    it's the one already flagged as unreliable --- there is currently no low-resource fallback.
+    \textbf{Reran instead on en-de} (directionally valid QE reference $\approx 0.57$, existing
+    four-condition baseline): best-of-$\PhaseThreeBestofnN$ scored $\PhaseThreeBestofnEndeCometkiwi$,
+    again edging out tool-alone ($0.819$) --- but by $\PhaseThreeBestofnEndeGapVsTool$, against
+    en-ha's $\PhaseThreeBestofnEnhaGapVsTool$ gap. With a more trustworthy judge, ``compute
+    alone wins'' nearly vanishes to a rounding-distance tie, consistent with (not proof of) the
+    en-ha margin being substantially QE noise rather than a real compute-beats-architecture
+    result. Still doesn't settle Sec.~7 for the low-resource case en-de doesn't represent, but
+    it changes how much weight the en-ha number alone deserves.
 \end{itemize}
 
 \begin{center}
@@ -159,13 +169,22 @@ degenerate-repeat confound described above, not a clean reasoning-vs-baseline co
     --- so this looks like a threshold somewhere between 90M and 236M bytes, not the smooth
     dose-response curve the four-point version suggested. To trust more: still only 5 points
     (this model only); a language between 90M and 236M bytes would tell us whether this is a
-    sharp cutoff or just a steep slope. \emph{Possible challenge to Sec.~4:} the below-floor
-    outputs aren't flawed translations a tool could correct --- they're the English source
-    echoed back, meaning there's no partial competence left to ground. Sec.~4 argues external
-    resources carry \emph{more} marginal value as neural coverage thins; that argument
-    implicitly assumes some translation attempt exists to augment. If this generalizes beyond
-    BLOOMZ, the marginal-value argument may have a floor below which it inverts to zero, not
-    just a low: the tool would have to generate the whole translation, not inform one.
+    sharp cutoff or just a steep slope. \emph{Challenge to Sec.~4, sharpened:} Sec.~4's
+    ``more marginal value as coverage thins'' claim is plausible in the middle regime (model
+    attempts translation but lacks vocabulary/nuance) but breaks at the floor for three
+    compounding reasons, not just one. \emph{Conceptual:} below the floor there's no
+    translation quality for a resource to have marginal value \emph{over} --- source-echo
+    isn't a bad translation, it's a non-translation. \emph{Mechanistic:} external resources
+    are usually delivered \emph{in} the target language; if the model's representation of
+    that language is too sparse to translate, it may be too sparse to use the resource
+    either --- help arrives through the same broken channel. \emph{Policy:} the comparison
+    this claim is meant to inform reverses below the floor --- pretraining-time intervention
+    beats inference-time scaffolding once the problem is missing capability, not missing
+    knowledge. The bounded, defensible version of Sec.~4's claim (``above the floor, marginal
+    value increases as coverage thins'') is close to tautological --- it says knowledge-gap
+    fixes help knowledge gaps. The consequential version --- that this extends to the
+    lowest-coverage languages, which is what motivates prioritizing them --- is exactly what
+    the floor finding argues against.
   \item Cross-checked for Phase 3's Aya-101/mT5: German has $\PhaseSixMtFiveDeTokensB$B tokens
     in mC4 vs.\ Hausa's $\PhaseSixMtFiveHaTokensB$B ($\sim\PhaseSixMtFiveDeHaRatio\times$) --- so
     Phase 3's en-de anchor \emph{is} legitimate for that model, unlike BLOOM's zero-exposure
@@ -188,12 +207,15 @@ option we pick next.
 
 \subsection*{Scope against the proposal}
 
-Two honesty notes. First, ha/km/ps/xh/zu were chosen because real WMT human judgments exist
+Three honesty notes. First, ha/km/ps/xh/zu were chosen because real WMT human judgments exist
 for them, not because they're confirmed as the Matrix Lab's actual target portfolio --- worth
 checking those match before leaning on these results for portfolio-specific decisions. Second,
 these six phases only touch Secs.~5.1--5.3; document-level session management (Sec.~5.4),
 parallel hypothesis exploration (Sec.~5.5), and interactive interpretation with clarification
-(Sec.~5.6, the clinical MT program's home turf) are untested here.
+(Sec.~5.6, the clinical MT program's home turf) are untested here. Third, Phase 1's own
+per-pair QE-reliability numbers mix translation directions (ha is en$\to$ha; km/ps are
+X$\to$en; xh/zu are never measured against English at all) --- worth keeping in mind before
+citing any of them as evidence about the en$\to$X direction this project actually tests.
 
 \section*{Open decision}
 
@@ -212,11 +234,28 @@ Three ways to get an unconfounded joint-necessity result:
   \item \textbf{Narrow scope}: run the test on one pair BLOOMZ already generates reliably
     (en-fr, $\PhaseSixEnfrCleanRatePct\%$ clean), treat low-resource generalization as future
     work.
+  \item \textbf{Redesign Phase 3 around Aya-101's actual architecture, on Aya-101 --- already
+    hit a wall.} The original CoT confound wasn't just a bad prompt --- decoder-only CoT
+    assumes reasoning and source tokens share one self-attention stream, which doesn't hold
+    for a T5 encoder-decoder (the decoder only sees the source through cross-attention to a
+    representation the encoder already fixed). The redesign called for a mandatory
+    \emph{format-learning pre-test} before trusting any result built on structured output ---
+    ran it: 3 few-shot examples of ``Analysis: \ldots\ / Translation: \ldots'', 20 held-out
+    en-ha sentences. \textbf{$\PhaseThreePretestNStructured$/$\PhaseThreePretestNSentences$
+    produced the requested structure.} Every response skipped straight to \texttt{Translation:},
+    ignoring the analysis step entirely despite three worked examples immediately before each
+    prompt. This isn't a partial failure to work around --- Aya-101 cannot currently be steered
+    into intermediate reasoning content via few-shot prompting, so the 3-condition design this
+    option describes is not executable on this model as specified. Would need either a
+    different elicitation strategy (fine-tuning, forced decoding) or a different model ---
+    which folds this option back into Option 1's search, not a parallel path.
 \end{enumerate}
 
 \noindent\textbf{Leaning toward option 2} --- it resolves Phase 6's confound directly rather
-than continuing to search for a model that clears it. Option 3 is the fallback if preserving an
-open-only stack matters more than resolving the question now.
+than continuing to search for a model that clears it, and now more so: Option 4's pre-test
+result shows Aya-101 specifically can't support the redesigned unconfounded test either, so
+there's no cheap parallel path left on the current model. Option 3 is the fallback if
+preserving an open-only stack matters more than resolving the question now.
 
 \section*{What changes in the paper draft}
 
@@ -230,10 +269,13 @@ open-only stack matters more than resolving the question now.
   \item \textbf{Core joint-necessity claim}, wherever stated: needs
     ``confounded/untested cleanly'' framing --- not silence, not overclaiming from Phase 3.
   \item \textbf{Sec.~7 (evaluation protocol)}: the (b)-vs-(c) best-of-$N$ comparison it
-    specifies is now partially filled in (en-ha, one model) --- as measured, compute alone
-    beat every architected condition, though the QE judge used for selection is one Phase 1
-    already flagged as unreliable for this pair. Needs a trustworthy-metric rerun before this
-    result can inform the draft either way.
+    specifies is now partially filled in for two pairs --- en-ha (compute alone beat every
+    architected condition, by $\PhaseThreeBestofnEnhaGapVsTool$) and en-de (same direction,
+    but the gap shrinks to $\PhaseThreeBestofnEndeGapVsTool$ under a more trustworthy QE
+    judge). Best current read: en-ha's large gap is mostly QE noise, not a real
+    compute-beats-architecture finding, but this is high-resource-vs-low-resource evidence,
+    not a clean rerun of the same pair under two judges --- no low-resource pair currently has
+    validated en$\to$X QE to run that clean version on.
 \end{itemize}
 
 \appendix

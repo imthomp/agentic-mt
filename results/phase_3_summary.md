@@ -199,15 +199,78 @@ judge, and Phase 1 measured COMET-KIWI's correlation with real human judgment fo
 specifically at Spearman 0.115 — below the 0.3 usability threshold, the weakest of all
 five low-resource pairs tested. Best-of-5-by-COMET-KIWI on this pair may just be selecting
 whichever sample happens to exploit COMET-KIWI's blind spots, not whichever is genuinely
-best. This experiment can't settle Sec. 7's (b)-vs-(c) comparison until it's rerun scored
-by something Phase 1 didn't already flag as unreliable for en-ha specifically (real human
-judgment, or a QE pair with a verified-usable score like km/xh) — but the result as
-measured is exactly the kind of check the proposal calls for, and it came back
-unfavorable to the architecture, which is itself worth taking seriously rather than
-setting aside because the caveat is convenient.
+best.
 
-- Code: `src/agentic_mt/pipelines/llm.py`'s `sample_n()`, `scripts/phase3_bestofn.py`
-- Outputs: `results/phase3_bestofn_enha.jsonl`, `results/phase3_bestofn_enha_scores.json`
+### Follow-up 1: no en→X low-resource pair has a validated QE score to rerun this on
+
+The obvious next step was to rerun best-of-N on a low-resource pair Phase 1 found more
+trustworthy — km (Spearman 0.457) or xh (0.342), both above the 0.3 threshold. Checked the
+actual WMT DA data before writing that code:
+
+```
+load_human_da(['km'])['lp'].value_counts()  ->  km-en    4722   (only)
+load_human_da(['ps'])['lp'].value_counts()  ->  ps-en    4611   (only)
+load_human_da(['xh','zu'])['lp'].value_counts()  ->  xh-zu 2968, zu-xh 2502  (only)
+```
+
+Every one of those correlations was measured in a direction that doesn't involve
+translating *into* the language from English — km-en and ps-en are the reverse direction,
+and xh/zu were only ever measured against each other, never against English at all. Only
+Hausa has real en→ha human-judgment data (matching what Phase 3 actually tests), and
+that's the one pair already flagged as unreliable. **There is currently no low-resource
+pair in this project with a validated en→X QE correlation to fall back on.** This is a
+real gap, not just an inconvenience — it means the "QE pair with a verified-usable score"
+suggested above doesn't exist yet for any of the five tested pairs, and building one would
+require either new human annotation in the en→X direction or accepting the direction
+mismatch as a (weaker) proxy.
+
+### Follow-up 2: rerun on en-de instead — does a trustworthy judge change the outcome?
+
+Rerouted to en-de, which has both a directionally-valid QE reference point (~0.57,
+mqmbench) and an existing four-condition Phase 3 baseline to compare against
+(`scripts/phase3_bestofn_ende.py`, same methodology, best-of-5 at temp=0.7):
+
+| Condition | Mean COMET-KIWI (en-de) |
+|---|---|
+| L1_baseline (greedy, original Phase 3) | 0.804 |
+| **L1_baseline best-of-5 (temp=0.7)** | **0.827** |
+| L1_cot (original) | 0.766 |
+| L1_tool (original) | 0.819 |
+| L1_cot_tool (original) | 0.720 |
+
+Best-of-5 again edges out every architected condition, including tool-alone — but the
+margin over tool-alone is 0.007 here, against 0.064 on en-ha. With a QE judge closer to
+trustworthy, "compute alone wins" nearly disappears; it's a rounding-distance tie with
+tool-alone rather than a clear win. This is consistent with (not proof of) the en-ha gap
+being substantially inflated by COMET-KIWI's unreliability there rather than reflecting a
+real compute-beats-architecture effect. Sec. 7's question is still not cleanly answered —
+en-de is high-resource, so this doesn't speak to the low-resource case the theory is
+actually about — but it does suggest the en-ha result shouldn't be read as strong evidence
+either way.
+
+### Follow-up 3: format-learning pre-test for a redesigned CoT condition — failed
+
+Separately, before designing any new CoT-style condition for Aya-101 (see "Next steps"),
+checked the precondition that any such design depends on: can Aya-101 produce structured
+`Analysis: ... / Translation: ...` output at all, given three few-shot demonstrations?
+(`scripts/phase3_pretest_format.py`, 20 held-out en-ha sentences, seed=43.)
+
+**No.** 0/20 responses contained the requested structure. Every single response skipped
+straight to `Translation: ...`, ignoring the analysis step entirely despite three
+worked examples showing the format immediately before each prompt. This isn't a subtle
+partial-credit failure — it's a clean, unambiguous result: Aya-101 cannot currently be
+steered into producing intermediate reasoning content via few-shot prompting alone. Any
+redesigned unconfounded CoT test on this model needs either a different elicitation
+strategy (explicit fine-tuning, a different prompt structure, forced decoding) or a
+different model entirely — this pre-test is exactly what would have flagged Phase 3's
+CoT-chain problem before spending its full budget on it, and it now rules out the
+cheapest version of a fix on Aya-101 specifically.
+
+- Code: `src/agentic_mt/pipelines/llm.py`'s `sample_n()`, `scripts/phase3_bestofn.py`,
+  `scripts/phase3_bestofn_ende.py`, `scripts/phase3_pretest_format.py`
+- Outputs: `results/phase3_bestofn_enha.jsonl`, `results/phase3_bestofn_enha_scores.json`,
+  `results/phase3_bestofn_ende.jsonl`, `results/phase3_bestofn_ende_scores.json`,
+  `results/phase3_pretest_format_enha.jsonl`, `results/phase3_pretest_format_enha_result.json`
 
 ## Where things live
 

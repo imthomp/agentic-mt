@@ -45,7 +45,12 @@
     "verbatim_repeat_denominator": 100,
     "bestofn_n": 5,
     "bestofn_enha_cometkiwi": 0.666,
-    "bestofn_enha_single_sample_cometkiwi": 0.581
+    "bestofn_enha_single_sample_cometkiwi": 0.581,
+    "bestofn_ende_cometkiwi": 0.827,
+    "bestofn_ende_gap_vs_tool": 0.007,
+    "bestofn_enha_gap_vs_tool": 0.064,
+    "pretest_n_sentences": 20,
+    "pretest_n_structured": 0
   },
 
   "phase4": {
