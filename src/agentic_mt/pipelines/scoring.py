@@ -4,13 +4,15 @@ no chunking/caching complexity is needed here (contrast with mqmbench's
 comet.py, built for tens of thousands of segments).
 """
 
-import sacrebleu
-from comet import download_model, load_from_checkpoint
-
 _MODEL_CACHE: dict[str, object] = {}
 
 
 def _load_comet(model_name: str):
+    # COMET is intentionally imported only when a COMET-backed metric is used.
+    # This keeps lightweight utilities and unit tests importable without the
+    # large optional metric stack installed.
+    from comet import download_model, load_from_checkpoint
+
     if model_name not in _MODEL_CACHE:
         path = download_model(model_name)
         _MODEL_CACHE[model_name] = load_from_checkpoint(path)
@@ -35,6 +37,8 @@ def score_comet(
 
 
 def score_chrf(hypotheses: list[str], references: list[str]) -> list[float]:
+    import sacrebleu
+
     chrf = sacrebleu.CHRF()
     return [chrf.sentence_score(h, [r]).score for h, r in zip(hypotheses, references)]
 
