@@ -47,3 +47,8 @@ reports/*.synctex.gz
 
 # OS/editor cruft
 .DS_Store
+core.*
+*.zip
+
+# Local research material not intended for public release
+related-work/

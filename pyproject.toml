@@ -25,6 +25,9 @@ dependencies = [
     "unbabel-comet>=2.2.7",
 ]
 
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-cov>=5"]
+
 [tool.uv]
 package = true
 

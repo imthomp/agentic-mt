@@ -12,7 +12,7 @@ data_source: "RicardoRei/wmt-da-human-evaluation (via multilingual-mqm-benchmark
 output_dir: results/qe_wmt_da_low_resource
 
 # Pipeline-specific fields
-mqmbench_root: /home/it238/projects/multilingual-mqm-benchmark/multilingual-mqm-benchmark
+mqmbench_root: ${MQMBENCH_ROOT}
 target_langs: [ha, km, ps, xh, zu]
 qe_metric: cometkiwi          # reference-free COMET-KIWI
 reference_metrics: [comet, chrf]

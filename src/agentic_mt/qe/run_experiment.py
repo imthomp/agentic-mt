@@ -13,6 +13,7 @@ Usage:
 """
 
 import argparse
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -27,7 +28,12 @@ QE_FLAG_THRESHOLD = 0.3
 
 
 def run(config: dict) -> Path:
-    mqmbench_root = Path(config["mqmbench_root"]).expanduser()
+    mqmbench_root = Path(os.path.expandvars(config["mqmbench_root"])).expanduser()
+    if "$" in str(mqmbench_root):
+        raise ValueError(
+            "mqmbench_root contains an unresolved environment variable; "
+            "set MQMBENCH_ROOT or provide an explicit path in the config"
+        )
     target_langs = config["target_langs"]
     qe_metric = config["qe_metric"]
     reference_metrics = config["reference_metrics"]
