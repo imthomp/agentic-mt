@@ -1,0 +1,42 @@
+# Phase 7: joint-necessity test on the one pair where BLOOMZ has real but
+# imperfect competence, paired against its actual best-covered language.
+#
+# Phase 6 found BLOOMZ's clean-generation rate is a floor/threshold effect,
+# not a smooth curve: en-fr (208B ROOTS bytes) 100% clean, en-sw (236M) 50%
+# clean, en-yo/en-xh/en-zu (89.7M/14.3M/8.5M) all 0% clean. en-yo/en-xh/en-zu
+# are useless for testing CoT/tool interventions -- no baseline competence
+# for a tool to augment (see the Sec. 4 floor critique in the advisor
+# report). en-sw is the one pair with real headroom: imperfect baseline,
+# not zero. Paired here against en-fr (BLOOMZ's best-covered language, not
+# en-de -- Phase 6 found BLOOM's ROOTS corpus has ZERO German bytes, so
+# en-de would be testing BLOOMZ's actual blind spot, not a real
+# high-resource anchor for this model).
+#
+# This also sidesteps Phase 3's confound on a different axis: BLOOMZ is a
+# real causal decoder-only instruction-tuned model (unlike Aya-101's T5
+# seq2seq), and Phase 3's own pretest (scripts/phase3_pretest_format.py)
+# showed Aya-101 can't be steered into structured reasoning content at all
+# -- worth checking whether BLOOMZ, a genuinely different architecture,
+# does any better on the CoT conditions specifically.
+#
+# NOTE: an earlier BLOOMZ run at results/pipelines_l1_conditions_bloomz/
+# exists on disk but is the pre-fix run explicitly retracted in Phase 5's
+# summary (en-de baseline COMET-KIWI 0.32, chrF 1-12 -- the exact signature
+# of the 9 bugs fixed after that run, and also the wrong high-resource
+# anchor per the note above). Do not reuse those numbers; this is a fresh
+# run on the current, fixed codebase with a corrected pair selection.
+
+language_pair: "en-fr+en-sw"
+model_name: bigscience/bloomz-7b1
+sample_size: 100
+random_seed: 42
+data_source: "openlanguagedata/flores_plus devtest (en-fr, en-sw)"
+output_dir: results/pipelines_l1_conditions_bloomz_ensw
+
+pairs: [en-fr, en-sw]
+high_resource_pair: en-fr
+low_resource_pair: en-sw
+conditions: [l1_baseline, l1_cot, l1_tool, l1_cot_tool]
+metrics: [cometkiwi, comet, chrf]
+n_bootstrap: 1000
+gpus: 1
